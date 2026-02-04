@@ -12,6 +12,12 @@ const eraColors: Record<EraTag, string> = {
   '00s': 'bg-slate-500/10 text-slate-300',
 };
 
+const userEraColors: Record<EraTag, string> = {
+  '80s': 'bg-pink-500/20 text-pink-400',
+  '90s': 'bg-yellow-500/20 text-yellow-400',
+  '00s': 'bg-gray-500/20 text-gray-300',
+};
+
 export function TopicCard({ topic, forumSlug }: TopicCardProps) {
   const timeAgo = (date: string) => {
     const now = new Date();
@@ -67,8 +73,15 @@ export function TopicCard({ topic, forumSlug }: TopicCardProps) {
               </p>
             )}
 
-            <div className="flex items-center gap-3 text-xs text-gray-500">
-              <span>by {topic.author?.username || 'Unknown'}</span>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span className="flex items-center gap-1.5">
+                by {topic.author?.display_name || topic.author?.username || 'Unknown'}
+                {topic.author?.favorite_era && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${userEraColors[topic.author.favorite_era]}`}>
+                    {topic.author.favorite_era}
+                  </span>
+                )}
+              </span>
               <span>•</span>
               <span>{timeAgo(topic.created_at)}</span>
             </div>

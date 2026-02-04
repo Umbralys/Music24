@@ -99,7 +99,7 @@ export function ChatOrchestrator({ forumSlug, topicSlug, subTopicSlug }: ChatOrc
             .single();
 
           if (data) {
-            setMessages((prev) => [...prev, data as Message]);
+            setMessages((prev) => [...prev, data as unknown as Message]);
           }
         }
       )

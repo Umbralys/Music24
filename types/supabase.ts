@@ -35,6 +35,7 @@ export type Database = {
           favorite_era?: '80s' | '90s' | '00s' | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       forums: {
         Row: {
@@ -65,6 +66,7 @@ export type Database = {
           era?: '80s' | '90s' | '00s' | 'all' | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       topics: {
         Row: {
@@ -76,6 +78,7 @@ export type Database = {
           description: string | null;
           pinned: boolean;
           locked: boolean;
+          era_tags: ('80s' | '90s' | '00s')[] | null;
           created_at: string;
           updated_at: string;
         };
@@ -88,6 +91,7 @@ export type Database = {
           description?: string | null;
           pinned?: boolean;
           locked?: boolean;
+          era_tags?: ('80s' | '90s' | '00s')[] | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -96,8 +100,10 @@ export type Database = {
           description?: string | null;
           pinned?: boolean;
           locked?: boolean;
+          era_tags?: ('80s' | '90s' | '00s')[] | null;
           updated_at?: string;
         };
+        Relationships: [];
       };
       sub_topics: {
         Row: {
@@ -122,11 +128,13 @@ export type Database = {
           title?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       messages: {
         Row: {
           id: string;
-          sub_topic_id: string;
+          topic_id: string | null;
+          sub_topic_id: string | null;
           user_id: string;
           content: string;
           created_at: string;
@@ -134,17 +142,33 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          sub_topic_id: string;
+          topic_id?: string | null;
+          sub_topic_id?: string | null;
           user_id: string;
           content: string;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
+          topic_id?: string | null;
+          sub_topic_id?: string | null;
           content?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
     };
   };
 };

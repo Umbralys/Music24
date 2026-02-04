@@ -11,8 +11,8 @@ export function AuthenticatedUser() {
 
   try {
     const user = useUser();
-    isSignedIn = user.isSignedIn;
-    isLoaded = user.isLoaded;
+    isSignedIn = user.isSignedIn ?? false;
+    isLoaded = user.isLoaded ?? false;
   } catch (error) {
     // Clerk is not configured
     hasClerk = false;

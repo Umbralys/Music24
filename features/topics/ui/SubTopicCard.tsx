@@ -1,11 +1,17 @@
 import Link from 'next/link';
-import { SubTopic } from '@/types';
+import { SubTopic, EraTag } from '@/types';
 
 interface SubTopicCardProps {
   subTopic: SubTopic;
   forumSlug: string;
   topicSlug: string;
 }
+
+const userEraColors: Record<EraTag, string> = {
+  '80s': 'bg-pink-500/20 text-pink-400',
+  '90s': 'bg-yellow-500/20 text-yellow-400',
+  '00s': 'bg-gray-500/20 text-gray-300',
+};
 
 export function SubTopicCard({ subTopic, forumSlug, topicSlug }: SubTopicCardProps) {
   const timeAgo = (date: string) => {
@@ -31,8 +37,15 @@ export function SubTopicCard({ subTopic, forumSlug, topicSlug }: SubTopicCardPro
               {subTopic.title}
             </h3>
 
-            <div className="flex items-center gap-3 text-xs text-gray-500 mt-2">
-              <span>by {subTopic.author?.username || 'Unknown'}</span>
+            <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
+              <span className="flex items-center gap-1.5">
+                by {subTopic.author?.display_name || subTopic.author?.username || 'Unknown'}
+                {subTopic.author?.favorite_era && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${userEraColors[subTopic.author.favorite_era]}`}>
+                    {subTopic.author.favorite_era}
+                  </span>
+                )}
+              </span>
               <span>•</span>
               <span>{timeAgo(subTopic.created_at)}</span>
             </div>

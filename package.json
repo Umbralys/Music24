@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.1",
+    "@clerk/themes": "^2.4.51",
     "@supabase/supabase-js": "^2.93.3",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^25.2.0",

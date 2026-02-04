@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import type { NextRequest, NextFetchEvent } from 'next/server';
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -8,25 +8,28 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/forums(.*)',
   '/api/webhooks(.*)',
+  '/profile(.*)',
 ]);
 
-export default function proxy(request: NextRequest) {
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const hasValidClerk = publishableKey &&
-    publishableKey !== 'pk_test_placeholder' &&
-    publishableKey.startsWith('pk_');
+const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const hasValidClerk = publishableKey &&
+  publishableKey !== 'pk_test_placeholder' &&
+  publishableKey.startsWith('pk_');
 
+const clerkHandler = clerkMiddleware(async (auth, request) => {
+  if (!isPublicRoute(request)) {
+    await auth.protect();
+  }
+});
+
+export default function proxy(request: NextRequest, event: NextFetchEvent) {
   // If Clerk is not configured, just pass through
   if (!hasValidClerk) {
     return NextResponse.next();
   }
 
   // Use Clerk middleware if configured
-  return clerkMiddleware(async (auth, request) => {
-    if (!isPublicRoute(request)) {
-      await auth.protect();
-    }
-  })(request as any);
+  return clerkHandler(request, event);
 }
 
 export const config = {

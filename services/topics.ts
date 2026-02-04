@@ -22,7 +22,7 @@ export async function getTopicsByForumId(forumId: string) {
     messages: undefined, // Remove the nested messages array
   }));
 
-  return topics as Topic[];
+  return topics as unknown as Topic[];
 }
 
 export async function getTopicBySlug(slug: string) {
@@ -47,7 +47,7 @@ export async function getTopicBySlug(slug: string) {
     messages: undefined,
   };
 
-  return topic as Topic;
+  return topic as unknown as Topic;
 }
 
 export async function createTopic(
@@ -82,5 +82,5 @@ export async function createTopic(
     .single();
 
   if (error) throw error;
-  return data as Topic;
+  return data as unknown as Topic;
 }

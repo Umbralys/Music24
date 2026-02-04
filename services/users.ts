@@ -71,3 +71,26 @@ export async function getUserProfileById(id: string) {
   if (error) throw error;
   return data as UserProfile;
 }
+
+// Update user profile fields (bio, favorite_era, display_name)
+export async function updateUserProfile(
+  clerkId: string,
+  updates: {
+    display_name?: string;
+    bio?: string;
+    favorite_era?: '80s' | '90s' | '00s';
+  }
+) {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('clerk_id', clerkId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as UserProfile;
+}

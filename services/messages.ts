@@ -13,7 +13,7 @@ export async function getMessagesByTopicId(topicId: string) {
     .order('created_at', { ascending: true });
 
   if (error) throw error;
-  return data as Message[];
+  return data as unknown as Message[];
 }
 
 // Create a new message (post) in a topic
@@ -32,7 +32,7 @@ export async function createTopicMessage(topicId: string, userId: string, conten
     .single();
 
   if (error) throw error;
-  return data as Message;
+  return data as unknown as Message;
 }
 
 // Subscribe to real-time messages for a topic
@@ -59,7 +59,7 @@ export function subscribeToTopicMessages(
           .single();
 
         if (data) {
-          onNewMessage(data as Message);
+          onNewMessage(data as unknown as Message);
         }
       }
     )
@@ -78,7 +78,7 @@ export async function getSubTopicsByTopicId(topicId: string) {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data as SubTopic[];
+  return data as unknown as SubTopic[];
 }
 
 export async function getMessagesBySubTopicId(subTopicId: string) {
@@ -92,7 +92,7 @@ export async function getMessagesBySubTopicId(subTopicId: string) {
     .order('created_at', { ascending: true });
 
   if (error) throw error;
-  return data as Message[];
+  return data as unknown as Message[];
 }
 
 export async function createMessage(subTopicId: string, userId: string, content: string) {
@@ -110,5 +110,5 @@ export async function createMessage(subTopicId: string, userId: string, content:
     .single();
 
   if (error) throw error;
-  return data as Message;
+  return data as unknown as Message;
 }

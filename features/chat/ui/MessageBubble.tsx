@@ -1,9 +1,15 @@
-import { Message } from '@/types';
+import { Message, EraTag } from '@/types';
 
 interface MessageBubbleProps {
   message: Message;
   isCurrentUser: boolean;
 }
+
+const eraColors: Record<EraTag, string> = {
+  '80s': 'bg-pink-500/20 text-pink-400',
+  '90s': 'bg-yellow-500/20 text-yellow-400',
+  '00s': 'bg-gray-500/20 text-gray-300',
+};
 
 export function MessageBubble({ message, isCurrentUser }: MessageBubbleProps) {
   const timeFormat = (date: string) => {
@@ -15,29 +21,48 @@ export function MessageBubble({ message, isCurrentUser }: MessageBubbleProps) {
     });
   };
 
+  const authorEra = message.author?.favorite_era;
+
   return (
     <div
-      className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`}
+      className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-3 group animate-in fade-in slide-in-from-bottom-2 duration-300`}
     >
-      <div
-        className={`max-w-[75%] md:max-w-[60%] ${
-          isCurrentUser
-            ? 'bg-blue-600 rounded-l-2xl rounded-tr-2xl'
-            : 'bg-zinc-800 rounded-r-2xl rounded-tl-2xl'
-        } px-4 py-3`}
-      >
+      <div className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-[70%]`}>
+
+        {/* Username Label (only for others) */}
         {!isCurrentUser && (
-          <div className="text-xs font-semibold text-amber-500 mb-1">
-            {message.author?.username || 'Unknown'}
+          <div className="flex items-center gap-1.5 mb-1 ml-3">
+            <span className="text-[10px] font-medium text-zinc-500 tracking-wide">
+              {message.author?.display_name || message.author?.username || 'Unknown'}
+            </span>
+            {authorEra && (
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${eraColors[authorEra]}`}>
+                {authorEra}
+              </span>
+            )}
           </div>
         )}
-        <p className="text-sm break-words">{message.content}</p>
+
+        {/* The Bubble */}
         <div
-          className={`text-xs mt-1 ${
-            isCurrentUser ? 'text-blue-200' : 'text-gray-500'
+          className={`relative px-5 py-3 shadow-sm ${
+            isCurrentUser
+              ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm'
+              : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-100 rounded-2xl rounded-tl-sm border border-zinc-700/30'
           }`}
         >
-          {timeFormat(message.created_at)}
+          <p className="text-[15px] leading-relaxed break-words font-normal">
+            {message.content}
+          </p>
+          
+          {/* Timestamp inside bubble */}
+          <div
+            className={`text-[10px] mt-1 text-right select-none ${
+              isCurrentUser ? 'text-blue-200/70' : 'text-zinc-500'
+            }`}
+          >
+            {timeFormat(message.created_at)}
+          </div>
         </div>
       </div>
     </div>
