@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Message, SubTopic, Forum, Topic } from '@/types';
+import { Message, SubTopic, Forum, Topic, MessageVoteInfo, EraBadge } from '@/types';
 import { getMessagesBySubTopicId, createMessage } from '@/services/messages';
 import { getForumBySlug } from '@/services/forums';
 import { getTopicBySlug } from '@/services/topics';
+import { getVoteCountsForMessages, getUserEraBadges, upvoteMessage } from '@/services/votes';
+import { getOrCreateUserProfile } from '@/services/users';
 import { supabase } from '@/lib/supabase';
 import { ChatContainer } from '../ui/ChatContainer';
 import { MessageList } from '../ui/MessageList';
@@ -20,19 +22,63 @@ interface ChatOrchestratorProps {
 }
 
 export function ChatOrchestrator({ forumSlug, topicSlug, subTopicSlug }: ChatOrchestratorProps) {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [forum, setForum] = useState<Forum | null>(null);
   const [topic, setTopic] = useState<Topic | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [subTopic, setSubTopic] = useState<SubTopic | null>(null);
+  const [userProfileId, setUserProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [voteMap, setVoteMap] = useState<Record<string, MessageVoteInfo>>({});
+  const [badgeMap, setBadgeMap] = useState<Record<string, EraBadge[]>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Load or create user profile
+  useEffect(() => {
+    async function loadUserProfile() {
+      if (user?.id) {
+        try {
+          const profile = await getOrCreateUserProfile(
+            user.id,
+            user.emailAddresses?.[0]?.emailAddress,
+            user.firstName ?? undefined,
+            user.lastName ?? undefined,
+            user.imageUrl
+          );
+          setUserProfileId(profile.id);
+        } catch (err) {
+          console.error('Failed to load user profile:', err);
+        }
+      }
+    }
+    if (isLoaded) {
+      loadUserProfile();
+    }
+  }, [user, isLoaded]);
+
+  // Batch-load votes and badges for a set of messages
+  const loadVotesAndBadges = useCallback(async (msgs: Message[], currentUserId: string | null) => {
+    try {
+      const messageIds = msgs.map(m => m.id);
+      const authorIds = [...new Set(msgs.map(m => m.user_id))];
+
+      const [votes, badges] = await Promise.all([
+        getVoteCountsForMessages(messageIds, currentUserId || undefined),
+        getUserEraBadges(authorIds),
+      ]);
+
+      setVoteMap(votes);
+      setBadgeMap(badges);
+    } catch (err) {
+      console.error('Failed to load votes/badges:', err);
+    }
+  }, []);
 
   // Load forum, topic, sub-topic and messages
   useEffect(() => {
@@ -63,6 +109,8 @@ export function ChatOrchestrator({ forumSlug, topicSlug, subTopicSlug }: ChatOrc
         // Get messages
         const messagesData = await getMessagesBySubTopicId(typedSubTopic.id);
         setMessages(messagesData);
+
+        await loadVotesAndBadges(messagesData, userProfileId);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load chat');
       } finally {
@@ -71,7 +119,7 @@ export function ChatOrchestrator({ forumSlug, topicSlug, subTopicSlug }: ChatOrc
     }
 
     loadData();
-  }, [forumSlug, topicSlug, subTopicSlug]);
+  }, [forumSlug, topicSlug, subTopicSlug, loadVotesAndBadges, userProfileId]);
 
   // Set up real-time subscription
   useEffect(() => {
@@ -99,7 +147,25 @@ export function ChatOrchestrator({ forumSlug, topicSlug, subTopicSlug }: ChatOrc
             .single();
 
           if (data) {
-            setMessages((prev) => [...prev, data as unknown as Message]);
+            const newMessage = data as unknown as Message;
+            setMessages((prev) => [...prev, newMessage]);
+
+            // New message starts with 0 votes
+            setVoteMap(prev => ({
+              ...prev,
+              [newMessage.id]: { vote_count: 0, has_voted: false },
+            }));
+
+            // Fetch badges for the author if not cached
+            if (newMessage.user_id) {
+              setBadgeMap(prev => {
+                if (prev[newMessage.user_id]) return prev;
+                getUserEraBadges([newMessage.user_id]).then(badges => {
+                  setBadgeMap(p => ({ ...p, ...badges }));
+                });
+                return prev;
+              });
+            }
           }
         }
       )
@@ -111,14 +177,31 @@ export function ChatOrchestrator({ forumSlug, topicSlug, subTopicSlug }: ChatOrc
   }, [subTopic]);
 
   const handleSendMessage = async (content: string) => {
-    if (!user || !subTopic) return;
+    if (!userProfileId || !subTopic) return;
 
     try {
-      // Note: In production, you'd store the Clerk user ID in your user_profiles table
-      // For now, we'll use the Clerk user ID directly
-      await createMessage(subTopic.id, user.id, content);
+      await createMessage(subTopic.id, userProfileId, content);
     } catch (err) {
       console.error('Failed to send message:', err);
+    }
+  };
+
+  const handleUpvote = async (messageId: string) => {
+    if (!userProfileId) return;
+
+    try {
+      const { voted } = await upvoteMessage(messageId, userProfileId);
+      if (voted) {
+        setVoteMap(prev => ({
+          ...prev,
+          [messageId]: {
+            vote_count: (prev[messageId]?.vote_count || 0) + 1,
+            has_voted: true,
+          },
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to upvote:', err);
     }
   };
 
@@ -157,14 +240,20 @@ export function ChatOrchestrator({ forumSlug, topicSlug, subTopicSlug }: ChatOrc
         header={<ForumHeader title={subTopic.title} />}
         messages={
           <>
-            <MessageList messages={messages} currentUserId={user?.id} />
+            <MessageList
+              messages={messages}
+              currentUserId={userProfileId || undefined}
+              voteMap={voteMap}
+              badgeMap={badgeMap}
+              onUpvote={handleUpvote}
+            />
             <div ref={messagesEndRef} />
           </>
         }
         input={
           <MessageInput
             onSendMessage={handleSendMessage}
-            disabled={!user}
+            disabled={!userProfileId}
           />
         }
       />

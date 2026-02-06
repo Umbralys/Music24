@@ -157,12 +157,52 @@ export type Database = {
         };
         Relationships: [];
       };
+      message_votes: {
+        Row: {
+          id: string;
+          message_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          message_id: string;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          message_id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      get_vote_counts_for_messages: {
+        Args: {
+          p_message_ids: string[];
+          p_current_user_id?: string;
+        };
+        Returns: {
+          message_id: string;
+          vote_count: number;
+          has_voted: boolean;
+        }[];
+      };
+      get_user_era_badges: {
+        Args: {
+          p_user_ids: string[];
+        };
+        Returns: {
+          user_id: string;
+          era: string;
+          vote_count: number;
+          badge_name: string;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;

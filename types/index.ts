@@ -73,6 +73,24 @@ export interface Message {
   author?: UserProfile;
 }
 
+// Street Cred Badge Types
+export type EraBadgeName =
+  | 'Newcomer'
+  | 'Beat Boxer' | 'Mixtape DJ' | 'Microphone Fiend'
+  | 'Freestyler' | 'Rapper' | 'Multi-Platinum Artist'
+  | 'CD Burner' | 'Out The Trunk' | 'CEO';
+
+export interface EraBadge {
+  era: EraTag;
+  vote_count: number;
+  badge_name: EraBadgeName;
+}
+
+export interface MessageVoteInfo {
+  vote_count: number;
+  has_voted: boolean;
+}
+
 // API Response Types
 export interface ApiResponse<T> {
   data?: T;

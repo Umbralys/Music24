@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { Topic, Message, Forum } from '@/types';
+import { Topic, Message, Forum, MessageVoteInfo, EraBadge } from '@/types';
 import { getTopicBySlug } from '@/services/topics';
 import { getForumBySlug } from '@/services/forums';
 import { getMessagesByTopicId, createTopicMessage, subscribeToTopicMessages } from '@/services/messages';
+import { getVoteCountsForMessages, getUserEraBadges, upvoteMessage } from '@/services/votes';
 import { ForumHeader } from '@/features/forums/ui/ForumHeader';
 import { MessageList } from '@/features/chat/ui/MessageList';
 import { MessageInput } from '@/features/chat/ui/MessageInput';
@@ -25,6 +26,8 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
   const [userProfileId, setUserProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [voteMap, setVoteMap] = useState<Record<string, MessageVoteInfo>>({});
+  const [badgeMap, setBadgeMap] = useState<Record<string, EraBadge[]>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages change
@@ -55,6 +58,24 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
     }
   }, [user, isLoaded]);
 
+  // Batch-load votes and badges for a set of messages
+  const loadVotesAndBadges = useCallback(async (msgs: Message[], currentUserId: string | null) => {
+    try {
+      const messageIds = msgs.map(m => m.id);
+      const authorIds = [...new Set(msgs.map(m => m.user_id))];
+
+      const [votes, badges] = await Promise.all([
+        getVoteCountsForMessages(messageIds, currentUserId || undefined),
+        getUserEraBadges(authorIds),
+      ]);
+
+      setVoteMap(votes);
+      setBadgeMap(badges);
+    } catch (err) {
+      console.error('Failed to load votes/badges:', err);
+    }
+  }, []);
+
   // Load forum, topic and messages
   useEffect(() => {
     async function loadData() {
@@ -69,6 +90,8 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
 
         const messagesData = await getMessagesByTopicId(topicData.id);
         setMessages(messagesData);
+
+        await loadVotesAndBadges(messagesData, userProfileId);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load topic');
       } finally {
@@ -77,7 +100,7 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
     }
 
     loadData();
-  }, [forumSlug, topicSlug]);
+  }, [forumSlug, topicSlug, loadVotesAndBadges, userProfileId]);
 
   // Real-time subscription
   useEffect(() => {
@@ -91,6 +114,23 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
         }
         return [...prev, newMessage];
       });
+
+      // New message starts with 0 votes
+      setVoteMap(prev => ({
+        ...prev,
+        [newMessage.id]: { vote_count: 0, has_voted: false },
+      }));
+
+      // Fetch badges for the author if not cached
+      if (newMessage.user_id) {
+        setBadgeMap(prev => {
+          if (prev[newMessage.user_id]) return prev;
+          getUserEraBadges([newMessage.user_id]).then(badges => {
+            setBadgeMap(p => ({ ...p, ...badges }));
+          });
+          return prev;
+        });
+      }
     });
 
     return () => {
@@ -106,6 +146,25 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
       // Message will be added via real-time subscription
     } catch (err) {
       console.error('Failed to send message:', err);
+    }
+  };
+
+  const handleUpvote = async (messageId: string) => {
+    if (!userProfileId) return;
+
+    try {
+      const { voted } = await upvoteMessage(messageId, userProfileId);
+      if (voted) {
+        setVoteMap(prev => ({
+          ...prev,
+          [messageId]: {
+            vote_count: (prev[messageId]?.vote_count || 0) + 1,
+            has_voted: true,
+          },
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to upvote:', err);
     }
   };
 
@@ -145,7 +204,13 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
       />
 
       <div className="flex-1 overflow-y-auto mt-6 bg-zinc-900/50 rounded-lg p-4">
-        <MessageList messages={messages} currentUserId={userProfileId || undefined} />
+        <MessageList
+          messages={messages}
+          currentUserId={userProfileId || undefined}
+          voteMap={voteMap}
+          badgeMap={badgeMap}
+          onUpvote={handleUpvote}
+        />
         <div ref={messagesEndRef} />
       </div>
 
