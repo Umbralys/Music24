@@ -190,41 +190,53 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 flex flex-col h-[calc(100dvh-4rem)]">
-      <Breadcrumb
-        items={[
-          { label: 'Forums', href: '/forums' },
-          { label: forum?.name || 'Forum', href: `/forums/${forumSlug}` },
-          { label: topic.title },
-        ]}
-      />
-      <ForumHeader
-        title={topic.title}
-        description={topic.description || undefined}
-      />
-
-      <div className="flex-1 overflow-y-auto mt-6 p-4">
-        <MessageList
-          messages={messages}
-          currentUserId={userProfileId || undefined}
-          voteMap={voteMap}
-          badgeMap={badgeMap}
-          onUpvote={handleUpvote}
-        />
-        <div ref={messagesEndRef} />
+    <div className="flex flex-col h-full max-h-[calc(100vh-4rem)] relative overflow-hidden bg-[var(--background)]">
+      
+      {/* Header Section - Sticky at top with blur */}
+      <div className="shrink-0 z-10 bg-[var(--background)]/95 backdrop-blur-md border-b border-zinc-800/50 px-4 py-3">
+        <div className="max-w-4xl mx-auto">
+          <Breadcrumb
+            items={[
+              { label: 'Forums', href: '/forums' },
+              { label: forum?.name || 'Forum', href: `/forums/${forumSlug}` },
+              { label: topic.title },
+            ]}
+          />
+          <ForumHeader
+            title={topic.title}
+            description={topic.description || undefined}
+          />
+        </div>
       </div>
 
-      <div className="mt-4 sticky bottom-0 bg-[var(--background)] py-4">
-        {user ? (
-          <MessageInput
-            onSendMessage={handleSendMessage}
-            disabled={!userProfileId || topic.locked}
+      {/* Messages Section - Flex container that scrolls independently */}
+      <div className="flex-1 overflow-y-auto pb-24 px-4 scroll-smooth">
+        <div className="max-w-4xl mx-auto mt-4">
+          <MessageList
+            messages={messages}
+            currentUserId={userProfileId || undefined}
+            voteMap={voteMap}
+            badgeMap={badgeMap}
+            onUpvote={handleUpvote}
           />
-        ) : (
-          <p className="text-center text-gray-400 py-4">
-            <a href="/sign-in" className="text-blue-400 hover:text-blue-300">Sign in</a> to post a reply
-          </p>
-        )}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Input Section - Fixed to bottom to stay above keyboard */}
+      <div className="fixed bottom-0 left-0 right-0 md:sticky bg-[var(--background)] p-4 pb-4 md:pb-0 z-20 border-t border-zinc-800/50 md:border-none">
+        <div className="max-w-4xl mx-auto">
+          {user ? (
+            <MessageInput
+              onSendMessage={handleSendMessage}
+              disabled={!userProfileId || topic.locked}
+            />
+          ) : (
+            <p className="text-center text-gray-400 py-2">
+              <a href="/sign-in" className="text-blue-400 hover:text-blue-300">Sign in</a> to post a reply
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
