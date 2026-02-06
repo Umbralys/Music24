@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 const navItems = [
   { href: '/forums', label: 'Forums', icon: '💬' },
@@ -11,6 +12,23 @@ const navItems = [
 
 export function MobileNav() {
   const pathname = usePathname();
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const handleResize = () => {
+      // If the visual viewport is significantly shorter than the window,
+      // the virtual keyboard is open
+      setKeyboardOpen(window.innerHeight - viewport.height > 100);
+    };
+
+    viewport.addEventListener('resize', handleResize);
+    return () => viewport.removeEventListener('resize', handleResize);
+  }, []);
+
+  if (keyboardOpen) return null;
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur border-t border-[var(--border)] z-50">
