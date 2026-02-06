@@ -14,15 +14,15 @@ export function ChatContainer({ header, messages, input }: ChatContainerProps) {
         {header}
       </div>
 
-      {/* Messages Container - added top padding for header and bottom padding for fixed input */}
+      {/* Messages Container */}
       <div className="flex-1 overflow-y-auto pt-20 pb-24 px-4 scroll-smooth">
         <div className="max-w-4xl mx-auto">
           {messages}
         </div>
       </div>
 
-      {/* Floating Input Area - Fixed on mobile to stay above keyboard, sticky on desktop */}
-      <div className="fixed bottom-0 left-0 right-0 md:sticky bg-[var(--background)] p-4 pb-safe z-20 border-t border-zinc-800/50 md:border-none">
+      {/* Floating Input Area - z-[60] to cover MobileNav, pb-4 for safe spacing */}
+      <div className="fixed bottom-0 left-0 right-0 md:sticky bg-[var(--background)] p-4 pb-4 z-[60] border-t border-zinc-800/50 md:border-none">
         {input}
       </div>
     </div>

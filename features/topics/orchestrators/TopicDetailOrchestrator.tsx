@@ -223,8 +223,8 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
         </div>
       </div>
 
-      {/* Input Section - Fixed to bottom to stay above keyboard */}
-      <div className="fixed bottom-0 left-0 right-0 md:sticky bg-[var(--background)] p-4 pb-4 md:pb-0 z-20 border-t border-zinc-800/50 md:border-none">
+      {/* Input Section - Fixed to bottom with z-60 to sit ABOVE MobileNav */}
+      <div className="fixed bottom-0 left-0 right-0 md:sticky bg-[var(--background)] p-4 pb-4 md:pb-0 z-[60] border-t border-zinc-800/50 md:border-none">
         <div className="max-w-4xl mx-auto">
           {user ? (
             <MessageInput
