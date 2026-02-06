@@ -44,7 +44,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto w-full">
-      <div className="relative flex items-end gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-[26px] p-2 focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:border-blue-500/50 focus-within:bg-zinc-800 transition-all shadow-sm">
+      <div className="relative flex items-end gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-2 focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:border-blue-500/50 focus-within:bg-zinc-800 transition-all shadow-sm">
         
         <textarea
           ref={textareaRef}
@@ -63,7 +63,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
           <button
             type="submit"
             disabled={!content.trim() || disabled}
-            className="p-2 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded-full transition-all duration-200 transform active:scale-95 shadow-md hover:shadow-blue-500/20 flex items-center justify-center mb-0.5"
+            className="p-2 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded-lg transition-all duration-200 transform active:scale-95 shadow-md hover:shadow-blue-500/20 flex items-center justify-center mb-0.5"
             aria-label="Send message"
           >
             <svg 

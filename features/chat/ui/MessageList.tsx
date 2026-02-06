@@ -21,7 +21,7 @@ export function MessageList({ messages, currentUserId, voteMap, badgeMap, onUpvo
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {messages.map((message) => (
         <MessageBubble
           key={message.id}

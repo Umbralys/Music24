@@ -8,9 +8,9 @@ interface ChatContainerProps {
 
 export function ChatContainer({ header, messages, input }: ChatContainerProps) {
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] relative bg-black/20 rounded-xl overflow-hidden border border-zinc-800/50">
+    <div className="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] relative overflow-hidden">
       {/* Header with blur */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/50 px-4 py-3">
+      <div className="absolute top-0 left-0 right-0 z-10 bg-[var(--background)]/90 backdrop-blur-md px-4 py-3">
         {header}
       </div>
 
@@ -22,10 +22,10 @@ export function ChatContainer({ header, messages, input }: ChatContainerProps) {
       </div>
 
       {/* Gradient Fade Overlay for bottom scrolling */}
-      <div className="h-8 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none sticky bottom-[72px] z-10" />
+      <div className="h-8 bg-gradient-to-t from-[var(--background)] to-transparent pointer-events-none sticky bottom-[72px] z-10" />
 
       {/* Floating Input Area */}
-      <div className="sticky bottom-0 bg-zinc-950 p-4 pt-2 z-20">
+      <div className="sticky bottom-0 bg-[var(--background)] p-4 pt-2 z-20">
         {input}
       </div>
     </div>

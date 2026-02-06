@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Message, EraTag, MessageVoteInfo, EraBadge } from '@/types';
 
 interface MessageBubbleProps {
@@ -32,106 +33,98 @@ export function MessageBubble({ message, isCurrentUser, voteInfo, authorBadges, 
   };
 
   const authorEra = message.author?.favorite_era;
+  const displayName = message.author?.display_name || message.author?.username || 'Unknown';
+  const avatarUrl = message.author?.avatar_url;
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <div
-      className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-3 group animate-in fade-in slide-in-from-bottom-2 duration-300`}
+      className={`w-full rounded-lg transition-colors duration-200 animate-in fade-in duration-300 hover:bg-zinc-900/40`}
     >
-      <div className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-[70%]`}>
+      <div className="flex gap-3 p-4">
+        {/* Left column: Avatar + Vote */}
+        <div className="flex flex-col items-center gap-2 shrink-0">
+          {/* Avatar */}
+          {avatarUrl ? (
+            <Image
+              src={avatarUrl}
+              alt={displayName}
+              width={32}
+              height={32}
+              className="rounded-full bg-zinc-800"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+              <span className="text-xs font-medium text-zinc-400">{initial}</span>
+            </div>
+          )}
 
-        {/* Username + badges (others) */}
-        {!isCurrentUser && (
-          <div className="flex items-center gap-1.5 mb-1 ml-3 flex-wrap">
-            <span className="text-[10px] font-medium text-zinc-500 tracking-wide">
-              {message.author?.display_name || message.author?.username || 'Unknown'}
-            </span>
-            {authorEra && (
-              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${eraColors[authorEra]}`}>
-                {authorEra}
-              </span>
-            )}
-            {authorBadges && authorBadges.length > 0 && authorBadges.map((badge) => (
-              <span
-                key={badge.era}
-                className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${badge.badge_name === 'Newcomer' ? 'bg-zinc-600/30 text-white border-zinc-500/40' : badgeColors[badge.era]}`}
-                title={`${badge.era}: ${badge.vote_count} votes`}
-              >
-                {badge.badge_name}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Era + badges (current user — no username) */}
-        {isCurrentUser && (authorEra || (authorBadges && authorBadges.length > 0)) && (
-          <div className="flex items-center gap-1.5 mb-1 mr-3 flex-wrap justify-end">
-            {authorEra && (
-              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${eraColors[authorEra]}`}>
-                {authorEra}
-              </span>
-            )}
-            {authorBadges && authorBadges.length > 0 && authorBadges.map((badge) => (
-              <span
-                key={badge.era}
-                className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${badge.badge_name === 'Newcomer' ? 'bg-zinc-600/30 text-white border-zinc-500/40' : badgeColors[badge.era]}`}
-                title={`${badge.era}: ${badge.vote_count} votes`}
-              >
-                {badge.badge_name}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* The Bubble */}
-        <div
-          className={`relative px-5 py-3 shadow-sm ${
-            isCurrentUser
-              ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm'
-              : 'bg-zinc-800/80 hover:bg-zinc-800 text-zinc-100 rounded-2xl rounded-tl-sm border border-zinc-700/30'
-          }`}
-        >
-          <p className="text-[15px] leading-relaxed break-words font-normal">
-            {message.content}
-          </p>
-
-          {/* Timestamp inside bubble */}
-          <div
-            className={`text-[10px] mt-1 text-right select-none ${
-              isCurrentUser ? 'text-blue-200/70' : 'text-zinc-500'
-            }`}
-          >
-            {timeFormat(message.created_at)}
-          </div>
+          {/* Vote button (below avatar, only for others when authenticated) */}
+          {!isCurrentUser && isAuthenticated && (
+            <div className="flex flex-col items-center">
+              {voteInfo?.has_voted ? (
+                <div className="flex flex-col items-center text-blue-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                    <path d="M10 2a.75.75 0 01.65.378l2.8 4.889h5.3a.75.75 0 01.416 1.372l-4.284 2.89 1.636 5.037a.75.75 0 01-1.153.838L10 13.93l-5.365 3.474a.75.75 0 01-1.153-.838l1.636-5.037-4.284-2.89A.75.75 0 011.25 7.267h5.3l2.8-4.889A.75.75 0 0110 2z" />
+                  </svg>
+                  {(voteInfo?.vote_count || 0) > 0 && (
+                    <span className="text-[10px] font-medium">{voteInfo.vote_count}</span>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={onUpvote}
+                  className="flex flex-col items-center text-zinc-600 hover:text-zinc-300 transition-colors"
+                  aria-label="Upvote"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                    <path d="M10 2a.75.75 0 01.65.378l2.8 4.889h5.3a.75.75 0 01.416 1.372l-4.284 2.89 1.636 5.037a.75.75 0 01-1.153.838L10 13.93l-5.365 3.474a.75.75 0 01-1.153-.838l1.636-5.037-4.284-2.89A.75.75 0 011.25 7.267h5.3l2.8-4.889A.75.75 0 0110 2z" />
+                  </svg>
+                  {(voteInfo?.vote_count || 0) > 0 && (
+                    <span className="text-[10px] font-medium">{voteInfo?.vote_count}</span>
+                  )}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Vote Button (below bubble, only for others' messages when authenticated) */}
-        {!isCurrentUser && isAuthenticated && (
-          <div className="flex items-center gap-1.5 ml-3 mt-0.5">
-            {voteInfo?.has_voted ? (
-              <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
-                  <path d="M10 2a.75.75 0 01.65.378l2.8 4.889h5.3a.75.75 0 01.416 1.372l-4.284 2.89 1.636 5.037a.75.75 0 01-1.153.838L10 13.93l-5.365 3.474a.75.75 0 01-1.153-.838l1.636-5.037-4.284-2.89A.75.75 0 011.25 7.267h5.3l2.8-4.889A.75.75 0 0110 2z" />
-                </svg>
-                {(voteInfo?.vote_count || 0) > 0 && (
-                  <span>{voteInfo.vote_count}</span>
-                )}
+        {/* Right column: Header + Content */}
+        <div className="flex-1 min-w-0">
+          {/* Header row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-semibold text-zinc-200">
+              {displayName}
+            </span>
+            {isCurrentUser && (
+              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">
+                You
               </span>
-            ) : (
-              <button
-                onClick={onUpvote}
-                className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full transition-all bg-zinc-800/50 text-zinc-500 hover:bg-zinc-700/50 hover:text-zinc-300"
-                aria-label="Upvote"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
-                  <path d="M10 2a.75.75 0 01.65.378l2.8 4.889h5.3a.75.75 0 01.416 1.372l-4.284 2.89 1.636 5.037a.75.75 0 01-1.153.838L10 13.93l-5.365 3.474a.75.75 0 01-1.153-.838l1.636-5.037-4.284-2.89A.75.75 0 011.25 7.267h5.3l2.8-4.889A.75.75 0 0110 2z" />
-                </svg>
-                {(voteInfo?.vote_count || 0) > 0 && (
-                  <span>{voteInfo?.vote_count}</span>
-                )}
-              </button>
             )}
+            {authorEra && (
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${eraColors[authorEra]}`}>
+                {authorEra}
+              </span>
+            )}
+            {authorBadges && authorBadges.length > 0 && authorBadges.map((badge) => (
+              <span
+                key={badge.era}
+                className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${badge.badge_name === 'Newcomer' ? 'bg-zinc-600/30 text-white border-zinc-500/40' : badgeColors[badge.era]}`}
+                title={`${badge.era}: ${badge.vote_count} votes`}
+              >
+                {badge.badge_name}
+              </span>
+            ))}
+            <span className="text-[10px] text-zinc-600 ml-auto select-none">
+              {timeFormat(message.created_at)}
+            </span>
           </div>
-        )}
+
+          {/* Message content */}
+          <p className="text-sm text-zinc-300 mt-1.5 leading-relaxed break-words">
+            {message.content}
+          </p>
+        </div>
       </div>
     </div>
   );

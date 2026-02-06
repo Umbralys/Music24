@@ -203,7 +203,7 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
         description={topic.description || undefined}
       />
 
-      <div className="flex-1 overflow-y-auto mt-6 bg-zinc-900/50 rounded-lg p-4">
+      <div className="flex-1 overflow-y-auto mt-6 p-4">
         <MessageList
           messages={messages}
           currentUserId={userProfileId || undefined}
@@ -214,7 +214,7 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="mt-4 sticky bottom-0 bg-zinc-950 py-4">
+      <div className="mt-4 sticky bottom-0 bg-[var(--background)] py-4">
         {user ? (
           <MessageInput
             onSendMessage={handleSendMessage}
