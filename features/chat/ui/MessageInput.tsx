@@ -44,7 +44,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto w-full">
-      <div className="relative flex items-end gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-2 focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:border-blue-500/50 focus-within:bg-zinc-800 transition-all shadow-sm">
+      <div className="relative flex items-end gap-1.5 md:gap-2 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-1.5 md:p-2 focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:border-blue-500/50 focus-within:bg-zinc-800 transition-all shadow-sm">
         
         <textarea
           ref={textareaRef}
@@ -55,7 +55,7 @@ export function MessageInput({ onSendMessage, disabled }: MessageInputProps) {
           disabled={disabled}
           rows={1}
           // Added 'focus:outline-none' here to remove the inner white box
-          className="w-full bg-transparent border-none text-gray-100 placeholder:text-zinc-500 text-sm focus:ring-0 focus:outline-none resize-none overflow-hidden no-scrollbar py-3 px-4 min-h-[44px]"
+          className="w-full bg-transparent border-none text-gray-100 placeholder:text-zinc-500 text-sm focus:ring-0 focus:outline-none resize-none overflow-hidden no-scrollbar py-2 px-3 min-h-[36px] md:py-3 md:px-4 md:min-h-[44px]"
           style={{ height: 'auto' }}
         />
 

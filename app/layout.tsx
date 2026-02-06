@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ConditionalClerkProvider } from "@/features/auth/ui/ConditionalClerkProvider";
 import { Header } from "@/features/layout/ui/Header";
 import { MobileNav } from "@/features/layout/ui/MobileNav";
@@ -9,6 +9,12 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Music24 - Hip Hop & R&B Lounge",
   description: "A community for 80s, 90s, and 00s hip hop and R&B enthusiasts",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({

@@ -8,7 +8,7 @@ interface ChatContainerProps {
 
 export function ChatContainer({ header, messages, input }: ChatContainerProps) {
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] relative overflow-hidden">
+    <div className="flex flex-col h-[calc(100dvh-8rem)] md:h-[calc(100dvh-6rem)] relative overflow-hidden">
       {/* Header with blur */}
       <div className="absolute top-0 left-0 right-0 z-10 bg-[var(--background)]/90 backdrop-blur-md px-4 py-3">
         {header}

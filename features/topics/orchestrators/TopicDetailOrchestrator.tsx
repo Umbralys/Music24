@@ -190,7 +190,7 @@ export function TopicDetailOrchestrator({ forumSlug, topicSlug }: TopicDetailOrc
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 flex flex-col h-[calc(100vh-4rem)]">
+    <div className="container mx-auto px-4 py-8 flex flex-col h-[calc(100dvh-4rem)]">
       <Breadcrumb
         items={[
           { label: 'Forums', href: '/forums' },
