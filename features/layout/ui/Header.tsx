@@ -3,9 +3,10 @@ import { ReactNode } from 'react';
 
 interface HeaderProps {
   userButton: ReactNode;
+  todayReleaseCount?: number;
 }
 
-export function Header({ userButton }: HeaderProps) {
+export function Header({ userButton, todayReleaseCount = 0 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/80">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -23,10 +24,13 @@ export function Header({ userButton }: HeaderProps) {
             Forums
           </Link>
           <Link
-            href="/trending"
-            className="text-sm font-medium hover:text-blue-400 transition-colors"
+            href="/on-this-day"
+            className="text-sm font-medium hover:text-blue-400 transition-colors flex items-center gap-1.5"
           >
-            Trending
+            On This Day
+            {todayReleaseCount > 0 && (
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            )}
           </Link>
           <Link
             href="/about"

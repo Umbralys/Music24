@@ -4,6 +4,7 @@ import { Header } from "@/features/layout/ui/Header";
 import { MobileNav } from "@/features/layout/ui/MobileNav";
 import { MainLayout } from "@/features/layout/ui/MainLayout";
 import { AuthenticatedUser } from "@/features/auth/orchestrators/AuthenticatedUser";
+import { getTodayReleases } from "@/features/on-this-day/utils/get-today-releases";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ export default function RootLayout({
       <html lang="en">
         <body className="antialiased">
           <MainLayout
-            header={<Header userButton={<AuthenticatedUser />} />}
+            header={<Header userButton={<AuthenticatedUser />} todayReleaseCount={getTodayReleases().length} />}
             mobileNav={<MobileNav />}
           >
             {children}

@@ -2,17 +2,19 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { getTodayReleases } from '@/features/on-this-day/utils/get-today-releases';
 
 const navItems = [
   { href: '/forums', label: 'Forums', icon: '💬' },
-  { href: '/trending', label: 'Trending', icon: '🔥' },
+  { href: '/on-this-day', label: 'On This Day', icon: '📀' },
   { href: '/profile', label: 'Profile', icon: '👤' },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
   const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const hasTodayRelease = useMemo(() => getTodayReleases().length > 0, []);
 
   useEffect(() => {
     const viewport = window.visualViewport;
@@ -45,7 +47,12 @@ export function MobileNav() {
                   : 'text-gray-400 hover:text-blue-400'
               }`}
             >
-              <span className="text-xl">{item.icon}</span>
+              <span className="text-xl relative">
+                {item.icon}
+                {item.href === '/on-this-day' && hasTodayRelease && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                )}
+              </span>
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );
