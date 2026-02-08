@@ -31,6 +31,14 @@ function MonthGroup({ month, albums }: { month: string; albums: AlbumRelease[] }
       </h3>
       {/* Mobile: single column with limit */}
       <div className="md:hidden space-y-3">
+        {expanded && hasMore && (
+          <button
+            onClick={() => setExpanded(false)}
+            className="w-full py-2.5 rounded-lg bg-zinc-800/50 text-gray-400 text-sm font-medium hover:text-white hover:bg-zinc-800 transition-colors"
+          >
+            Show less
+          </button>
+        )}
         {visibleAlbums.map((album) => (
           <AlbumCard key={`${album.title}-${album.year}`} album={album} />
         ))}
