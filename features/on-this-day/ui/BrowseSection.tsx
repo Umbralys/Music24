@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { AlbumCard } from './AlbumCard';
 import { getAlbumsByMonth, filterByEra } from '../utils/get-today-releases';
+import { AlbumRelease } from '../data/album-releases';
 
 type EraFilter = '80s' | '90s' | '00s' | 'all';
+
+const MOBILE_LIMIT = 3;
 
 const ERA_TABS: { label: string; value: EraFilter }[] = [
   { label: 'All', value: 'all' },
@@ -12,6 +15,43 @@ const ERA_TABS: { label: string; value: EraFilter }[] = [
   { label: '90s', value: '90s' },
   { label: '00s', value: '00s' },
 ];
+
+function MonthGroup({ month, albums }: { month: string; albums: AlbumRelease[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasMore = albums.length > MOBILE_LIMIT;
+  const remaining = albums.length - MOBILE_LIMIT;
+
+  // On mobile show limited, on desktop show all
+  const visibleAlbums = expanded ? albums : albums.slice(0, MOBILE_LIMIT);
+
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+        {month}
+      </h3>
+      {/* Mobile: single column with limit */}
+      <div className="md:hidden space-y-3">
+        {visibleAlbums.map((album) => (
+          <AlbumCard key={`${album.title}-${album.year}`} album={album} />
+        ))}
+        {hasMore && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="w-full py-2.5 rounded-lg bg-zinc-800/50 text-gray-400 text-sm font-medium hover:text-white hover:bg-zinc-800 transition-colors"
+          >
+            {expanded ? 'Show less' : `Show ${remaining} more`}
+          </button>
+        )}
+      </div>
+      {/* Desktop: full grid, no limit */}
+      <div className="hidden md:grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {albums.map((album) => (
+          <AlbumCard key={`${album.title}-${album.year}`} album={album} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function BrowseSection() {
   const [activeEra, setActiveEra] = useState<EraFilter>('all');
@@ -46,16 +86,7 @@ export function BrowseSection() {
       </div>
 
       {filteredMonths.map((group) => (
-        <div key={group.month} className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-            {group.month}
-          </h3>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {group.albums.map((album) => (
-              <AlbumCard key={`${album.title}-${album.year}`} album={album} />
-            ))}
-          </div>
-        </div>
+        <MonthGroup key={group.month} month={group.month} albums={group.albums} />
       ))}
     </div>
   );
