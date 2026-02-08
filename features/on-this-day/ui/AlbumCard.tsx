@@ -18,13 +18,13 @@ interface AlbumCardProps {
 
 export function AlbumCard({ album, highlight = false }: AlbumCardProps) {
   return (
-    <div className={`forum-card ${highlight ? 'border-amber-500/50' : ''}`}>
+    <div className={`forum-card overflow-hidden ${highlight ? 'border-amber-500/50' : ''}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
           <h3 className={`font-semibold truncate ${highlight ? 'text-lg' : 'text-base'}`}>
             {album.title}
           </h3>
-          <p className="text-gray-400 text-sm">{album.artist}</p>
+          <p className="text-gray-400 text-sm truncate">{album.artist}</p>
         </div>
         <span className="text-gray-500 text-sm shrink-0">{album.year}</span>
       </div>

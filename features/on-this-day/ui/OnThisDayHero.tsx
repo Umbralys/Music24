@@ -27,7 +27,7 @@ export function OnThisDayHero({ albums, dateLabel }: OnThisDayHeroProps) {
             : `${albums.length} albums released on this day`}
         </p>
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {albums.map((album) => (
           <AlbumCard key={`${album.title}-${album.year}`} album={album} highlight />
         ))}
